@@ -65,7 +65,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public boolean isEmailUnique(String email) {
 		optionalUser = userDetailsReposirory.findByEmail(email);
-		return optionalUser.isPresent();
+		return !optionalUser.isPresent();
 	}
 
 	@Override

@@ -6,13 +6,16 @@ import org.boot.manage.user.register.service.UserManagementServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin("*")
 public class UserRegistrationController {
 
 	private UserManagementServiceImpl userService;
@@ -34,15 +37,18 @@ public class UserRegistrationController {
 
 	//user registration
 	@PostMapping(path = "/register", consumes = "application/json")
-	public ResponseEntity<String> save(@RequestBody UserDetailsDTO user) {
+	@ResponseBody
+	public ResponseEntity<UserDetails> save(@RequestBody UserDetailsDTO user) {
 		boolean emailUnique = checkEmailUnique(user.getEmail());
 		if(emailUnique == true) {
 			BeanUtils.copyProperties(user, userDetails);
 			userService.saveUser(userDetails);
 			String msg = "registration successful with name :" + userDetails.getFirstName();
-			return new ResponseEntity<>(msg, HttpStatus.OK);
+			//return new ResponseEntity<>(msg, HttpStatus.OK);
+			return new ResponseEntity<>(userDetails, HttpStatus.OK);
 		}
-		return new ResponseEntity<>(user.getEmail()+" is already assigned", HttpStatus.OK);
+		//return new ResponseEntity<>(user.getEmail()+" is already assigned", HttpStatus.OK);
+		return new ResponseEntity<>(userDetails, HttpStatus.OK);
 	}
 	
 	private boolean checkEmailUnique(String email) {
