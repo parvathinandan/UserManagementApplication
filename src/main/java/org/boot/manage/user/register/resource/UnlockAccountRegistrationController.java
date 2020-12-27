@@ -23,7 +23,7 @@ public class UnlockAccountRegistrationController {
 		if(b == true)
 			return new ResponseEntity<>("unlock is successful",HttpStatus.OK);
 		String msg = "please enter correct temporary password that was send to your e-mail";
-		return new ResponseEntity<>(msg,HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(msg,HttpStatus.OK);
 	}
 	
 	private boolean checkUnlockAccount(String email,String newPassword,String tempPwd) {

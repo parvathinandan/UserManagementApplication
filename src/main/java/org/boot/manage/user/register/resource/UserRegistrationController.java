@@ -28,65 +28,70 @@ public class UserRegistrationController {
 	public UserRegistrationController(UserManagementServiceImpl userService) {
 		this.userService = userService;
 	}
-	
+
 	@GetMapping("/country")
 	public Map<Integer, String> getCountries() {
-		
+
 		return userService.findCountries();
 	}
+
 	@GetMapping("/states/{countryId}")
-	public Map<Integer, String> getStates( @PathVariable Integer countryId) {
-		
+	public Map<Integer, String> getStates(@PathVariable Integer countryId) {
+
 		return userService.findStates(countryId);
 	}
 
-	@GetMapping("/states/{stateId}")
+	@GetMapping("/cities/{stateId}")
 	public Map<Integer, String> getCities(@PathVariable Integer stateId) {
-	
-	return userService.findCities(stateId);
-}
-	//login checking
-	@PostMapping(path = "/login", consumes = "application/json")
-	public ResponseEntity<String> checkLoginCredentials(@RequestBody UserDetailsDTO user) {
-		String loginCheck = checkLoginCredentials(user.getEmail(), user.getPassword());
-		return new ResponseEntity<>(loginCheck, HttpStatus.OK);
-	}
-	
-	private String checkLoginCredentials(String email,String password) {
-		return userService.loginCheck(email,password);
+
+		return userService.findCities(stateId);
 	}
 
-	//user registration
+	// login checking
+	@PostMapping(path = "/login", consumes = "application/json")
+	@ResponseBody
+	public ResponseEntity<String> checkLoginCredentials(@RequestBody UserDetailsDTO user) {
+		System.out.println("user *******"+user);
+		String loginCheck = userService.loginCheck(user.getEmail(), user.getPassword());
+		return new ResponseEntity<>(loginCheck, HttpStatus.OK);
+	}
+
+	// user registration
 	@PostMapping(path = "/register", consumes = "application/json")
 	@ResponseBody
 	public ResponseEntity<UserDetails> save(@RequestBody UserDetailsDTO user) {
 		String emailUnique = checkEmailUnique(user.getEmail());
-		if(emailUnique.equals("true")) {
+		if (emailUnique.equals("true")) {
 			BeanUtils.copyProperties(user, userDetails);
 			userService.saveUser(userDetails);
-			String msg = "registration successful with name :" + userDetails.getFirstName();
-			//return new ResponseEntity<>(msg, HttpStatus.OK);
+			//String msg = "registration successful with name :" + userDetails.getFirstName();
+			// return new ResponseEntity<>(msg, HttpStatus.OK);
 			return new ResponseEntity<>(userDetails, HttpStatus.OK);
 		}
-		//return new ResponseEntity<>(user.getEmail()+" is already assigned", HttpStatus.OK);
+		// return new ResponseEntity<>(user.getEmail()+" is already assigned",
+		// HttpStatus.OK);
 		return new ResponseEntity<>(userDetails, HttpStatus.OK);
 	}
-	@GetMapping("/verifyEmail")
-	public String checkEmailUnique(String email) {	
-		if(userService.isEmailUnique(email))
+
+	@GetMapping("/verifyEmail/{email}")
+	public String checkEmailUnique(@PathVariable String email) {
+		if (userService.isEmailUnique(email))
 			return "true";
 		return "false";
 	}
-	
-	//retrieve forgot password
+
+	// retrieve forgot password
 	@PostMapping(path = "/retrieve", consumes = "application/json")
+	@ResponseBody
 	public ResponseEntity<String> retrievePassword(@RequestBody UserDetailsDTO user) {
+		
 		String emailUnique = checkEmailUnique(user.getEmail());
 		String msg = userService.forgotPassword(user.getEmail());
-		if(emailUnique.equals("true")) {
+		if (!emailUnique.equals("true")) {
 			return new ResponseEntity<>(msg, HttpStatus.OK);
 		}
-		return new ResponseEntity<>("Enter corect email", HttpStatus.NO_CONTENT);
+		else
+			return new ResponseEntity<>("Enter corect email", HttpStatus.OK);
 	}
 
 }

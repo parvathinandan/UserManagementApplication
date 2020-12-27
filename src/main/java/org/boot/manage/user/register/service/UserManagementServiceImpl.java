@@ -23,7 +23,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 	private CountryMasterRepository countryRepository;
 	private StateMasterRepository stateRepository;
 	private CityMasterRepository cityRepository;
-	private HashMap<Integer, String> hashMap = new HashMap<>();
 	private Optional<UserDetails> optionalUser = Optional.empty();
 	private UserDetails user = null;
 	
@@ -44,27 +43,33 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public Map<Integer, String> findCountries() {
 		List<CountryMaster> countryList = countryRepository.findAll();
-		countryList.forEach(country -> hashMap.put(country.getCountryId(), country.getCountryNames()));
-		return hashMap;
+		HashMap<Integer, String> countryMap = new HashMap<>();
+		countryList.forEach(country -> countryMap.put(country.getCountryId(), country.getCountryNames()));
+		return countryMap;
 	}
 
 	@Override
 	public Map<Integer, String> findStates(Integer countryId) {
 		List<StateMaster> stateList = stateRepository.findByCountryId(countryId);
-		stateList.forEach(state -> hashMap.put(state.getCountryId(), state.getStateNames()));
-		return hashMap;
+		System.out.println("cities :"+stateList);
+		HashMap<Integer, String> statesMap = new HashMap<>();
+		stateList.forEach(state -> statesMap.put(state.getStateId(),state.getStateNames()));
+		return statesMap;
 	}
 
 	@Override
 	public Map<Integer, String> findCities(Integer stateId) {
 		List<CityMaster> cityList = cityRepository.findByStateId(stateId);
-		cityList.forEach(city -> hashMap.put(city.getStateId(), city.getCityNames()));
-		return hashMap;
+		System.out.println("cities :"+cityList);
+		HashMap<Integer, String> citiesMap = new HashMap<>();
+		cityList.forEach(city -> citiesMap.put(city.getCityId(),city.getCityNames()));
+		return citiesMap;
 	}
 
 	@Override
 	public boolean isEmailUnique(String email) {
 		optionalUser = userDetailsReposirory.findByEmail(email);
+		System.out.println("optionalUser :"+optionalUser);
 		return !optionalUser.isPresent();
 	}
 
@@ -78,8 +83,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	@Override
 	public String loginCheck(String email, String password) {
+		System.out.println("UserManagementServiceImpl.loginCheck()");
 		optionalUser = userDetailsReposirory.findByEmailAndPassword(email, password);
-		
 		if(!optionalUser.isEmpty()) {
 			user = optionalUser.get();
 			String accountStatus = user.getAccountStatus();
