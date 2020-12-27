@@ -47,16 +47,13 @@ public class UserRegistrationController {
 		return userService.findCities(stateId);
 	}
 
-	// login checking
-	@PostMapping(path = "/login", consumes = "application/json")
-	@ResponseBody
-	public ResponseEntity<String> checkLoginCredentials(@RequestBody UserDetailsDTO user) {
-		System.out.println("user *******"+user);
-		String loginCheck = userService.loginCheck(user.getEmail(), user.getPassword());
-		return new ResponseEntity<>(loginCheck, HttpStatus.OK);
+	@GetMapping("/verifyEmail/{email}")
+	public String checkEmailUnique(@PathVariable String email) {
+		if (userService.isEmailUnique(email))
+			return "true";
+		return "false";
 	}
-
-	// user registration
+	
 	@PostMapping(path = "/register", consumes = "application/json")
 	@ResponseBody
 	public ResponseEntity<UserDetails> save(@RequestBody UserDetailsDTO user) {
@@ -73,25 +70,7 @@ public class UserRegistrationController {
 		return new ResponseEntity<>(userDetails, HttpStatus.OK);
 	}
 
-	@GetMapping("/verifyEmail/{email}")
-	public String checkEmailUnique(@PathVariable String email) {
-		if (userService.isEmailUnique(email))
-			return "true";
-		return "false";
-	}
+	
 
-	// retrieve forgot password
-	@PostMapping(path = "/retrieve", consumes = "application/json")
-	@ResponseBody
-	public ResponseEntity<String> retrievePassword(@RequestBody UserDetailsDTO user) {
-		
-		String emailUnique = checkEmailUnique(user.getEmail());
-		String msg = userService.forgotPassword(user.getEmail());
-		if (!emailUnique.equals("true")) {
-			return new ResponseEntity<>(msg, HttpStatus.OK);
-		}
-		else
-			return new ResponseEntity<>("Enter corect email", HttpStatus.OK);
-	}
 
 }
