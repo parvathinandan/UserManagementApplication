@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CountryMasterRepository extends JpaRepository<CountryMaster, Serializable>{
 
+	
 }
