@@ -60,8 +60,8 @@ public class UserRegistrationController {
 	@PostMapping(path = "/register", consumes = "application/json")
 	@ResponseBody
 	public ResponseEntity<UserDetails> save(@RequestBody UserDetailsDTO user) {
-		boolean emailUnique = checkEmailUnique(user.getEmail());
-		if(emailUnique == true) {
+		String emailUnique = checkEmailUnique(user.getEmail());
+		if(emailUnique.equals("true")) {
 			BeanUtils.copyProperties(user, userDetails);
 			userService.saveUser(userDetails);
 			String msg = "registration successful with name :" + userDetails.getFirstName();
@@ -81,12 +81,12 @@ public class UserRegistrationController {
 	//retrieve forgot password
 	@PostMapping(path = "/retrieve", consumes = "application/json")
 	public ResponseEntity<String> retrievePassword(@RequestBody UserDetailsDTO user) {
-		boolean emailUnique = checkEmailUnique(user.getEmail());
+		String emailUnique = checkEmailUnique(user.getEmail());
 		String msg = userService.forgotPassword(user.getEmail());
-		if(emailUnique == true) {
+		if(emailUnique.equals("true")) {
 			return new ResponseEntity<>(msg, HttpStatus.OK);
 		}
-		return new ResponseEntity<>(msg, HttpStatus.OK);
+		return new ResponseEntity<>("Enter corect email", HttpStatus.NO_CONTENT);
 	}
 
 }
