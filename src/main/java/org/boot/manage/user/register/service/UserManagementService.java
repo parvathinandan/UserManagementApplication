@@ -24,4 +24,6 @@ public interface UserManagementService {
 	public boolean unlockAccount(String email,String newPwd);
 	
 	public String forgotPassword(String email);
+	
+	public boolean sendMail(String email,String subject,String body);
 }

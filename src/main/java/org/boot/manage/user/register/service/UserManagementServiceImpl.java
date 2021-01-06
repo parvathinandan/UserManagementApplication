@@ -14,6 +14,9 @@ import org.boot.manage.user.register.repo.CityMasterRepository;
 import org.boot.manage.user.register.repo.CountryMasterRepository;
 import org.boot.manage.user.register.repo.StateMasterRepository;
 import org.boot.manage.user.register.repo.UserDetailsReposirory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +26,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 	private CountryMasterRepository countryRepository;
 	private StateMasterRepository stateRepository;
 	private CityMasterRepository cityRepository;
+	@Autowired
+	private JavaMailSender mailSender;
 	private Optional<UserDetails> optionalUser = Optional.empty();
 	private UserDetails user = null;
 	
@@ -36,8 +41,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 		this.countryRepository = countryRepository;
 		this.stateRepository = stateRepository;
 		this.cityRepository = cityRepository;
-		
-	
 	}
 
 	@Override
@@ -51,7 +54,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public Map<Integer, String> findStates(Integer countryId) {
 		List<StateMaster> stateList = stateRepository.findByCountryId(countryId);
-		System.out.println("cities :"+stateList);
 		HashMap<Integer, String> statesMap = new HashMap<>();
 		stateList.forEach(state -> statesMap.put(state.getStateId(),state.getStateNames()));
 		return statesMap;
@@ -60,7 +62,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public Map<Integer, String> findCities(Integer stateId) {
 		List<CityMaster> cityList = cityRepository.findByStateId(stateId);
-		System.out.println("cities :"+cityList);
 		HashMap<Integer, String> citiesMap = new HashMap<>();
 		cityList.forEach(city -> citiesMap.put(city.getCityId(),city.getCityNames()));
 		return citiesMap;
@@ -69,7 +70,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 	@Override
 	public boolean isEmailUnique(String email) {
 		optionalUser = userDetailsReposirory.findByEmail(email);
-		System.out.println("optionalUser :"+optionalUser);
 		return !optionalUser.isPresent();
 	}
 
@@ -83,7 +83,6 @@ public class UserManagementServiceImpl implements UserManagementService {
 
 	@Override
 	public String loginCheck(String email, String password) {
-		System.out.println("UserManagementServiceImpl.loginCheck()");
 		optionalUser = userDetailsReposirory.findByEmailAndPassword(email, password);
 		if(!optionalUser.isEmpty()) {
 			user = optionalUser.get();
@@ -130,9 +129,44 @@ public class UserManagementServiceImpl implements UserManagementService {
 		optionalUser = userDetailsReposirory.findByEmail(email);
 		if(!optionalUser.isEmpty()) {
 			user = optionalUser.get();
-			return "your account password is :"+user.getPassword();
+			return user.getPassword();
 		}
 		return "Invalid Email :"+email;
 	}
-
+	
+	@Override
+	public boolean sendMail(String email,String subject,String body) {
+		boolean success = false;
+		try {
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(email);
+			message.setSubject(subject);
+			message.setText(body);
+			mailSender.send(message);
+			success = true;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return success;
+	}
+	
+	public void getByEmail(String email) {
+		optionalUser = userDetailsReposirory.findByEmail(email);
+		if(optionalUser.isPresent()) {
+			UserDetails userDetails = optionalUser.get();
+			if(userDetails.getAccountStatus().equalsIgnoreCase("unlocked"))
+				System.out.println("account is already unlocked........");
+			else
+				System.out.println("account is locked and redirect to unlock form page.....");
+		}
+	}
+	
+	public String unLockByEmail(String email) {
+		optionalUser = userDetailsReposirory.findByEmail(email);
+		user = optionalUser.get();
+		user.setAccountStatus("unlocked");
+		return "your account is activated";
+	}
 }

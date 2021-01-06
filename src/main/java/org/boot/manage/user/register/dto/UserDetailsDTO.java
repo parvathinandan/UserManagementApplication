@@ -6,7 +6,7 @@ import lombok.Data;
 
 public @Data class UserDetailsDTO {
 
-	private Integer usId;
+
 	private String firstName;
 	private String lastName;
 	private String email;
@@ -16,7 +16,5 @@ public @Data class UserDetailsDTO {
 	private String countryName;
 	private String state;
 	private String city;
-	private String password;
-	private String accountStatus;
-	private String newPassword;
+
 }
